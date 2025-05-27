@@ -1,10 +1,8 @@
+
 package com.pdmcourse.spotlyfe
 
 import android.app.Application
-import com.pdmcourse.spotlyfe.data.AppProvider
+import dagger.hilt.android.HiltAndroidApp
 
-class SpotLyfeApplication: Application() {
-  val appProvider by lazy {
-    AppProvider(this)
-  }
-}
+@HiltAndroidApp
+class SpotLyfeApplication : Application()

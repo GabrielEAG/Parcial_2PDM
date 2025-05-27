@@ -1,66 +1,66 @@
 package com.pdmcourse.spotlyfe.ui.screens.SavedPlaces
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.pdmcourse.spotlyfe.ui.navigation.Screen
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.pdmcourse.spotlyfe.data.model.Place
-import com.pdmcourse.spotlyfe.ui.layout.CustomFloatingButton
 import com.pdmcourse.spotlyfe.ui.layout.CustomTopBar
 
 @Composable
-fun SavedPlacesScreen() {
+fun SavedPlacesScreen(
+  navController: NavController,
+  viewModel: SavedPlacesViewModel = hiltViewModel()
+) {
+  val places by viewModel.places.collectAsState()
 
-  val UCA = Place(
-    name = "Centro Monseñor Romero",
-    remark = "Marker in Centro Monseñor Romero",
-    latitude = 13.679024407659101,
-    longitude = -89.23578718993471,
-  )
-
+  val initialMapPosition = LatLng(13.679244047895181, -89.2357873899347) // Posición inicial del mapa (puedes ajustar)
   val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(UCA.latitude, UCA.longitude), 16f)
-  }
-
-  var uiSettings by remember {
-    mutableStateOf(MapUiSettings(zoomControlsEnabled = false))
-  }
-  var properties by remember {
-    mutableStateOf(MapProperties(mapType = MapType.HYBRID))
+    position = CameraPosition.fromLatLngZoom(initialMapPosition, 10f)
   }
 
   Scaffold(
-    topBar = { CustomTopBar() },
-    floatingActionButton = { CustomFloatingButton(onClick = {})}
-  ) { innerPadding ->
-    Column(modifier = Modifier.padding(innerPadding)) {
-
+    topBar = {
+      CustomTopBar(title = "SpotLyfe - Tus Lugares Favoritos")
+    },
+    floatingActionButton = {
+      FloatingActionButton(
+        onClick = {
+          navController.navigate(Screen.AddPlaceScreenNavigation.route)
+        }
+      ) {
+        Icon(Icons.Filled.Add, "Agregar nuevo lugar")
+      }
+    }
+  ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
       GoogleMap(
         modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = properties,
-        uiSettings = uiSettings
+        cameraPositionState = cameraPositionState
       ) {
-        Marker(
-          state = MarkerState(position = LatLng(UCA.latitude, UCA.longitude)),
-          title = UCA.name,
-          snippet = UCA.remark
-        )
+        places.forEach { place ->
+          Marker(
+            state = MarkerState(position = LatLng(place.latitude, place.longitude)),
+            title = place.name,
+            snippet = place.description
+          )
+        }
       }
     }
   }

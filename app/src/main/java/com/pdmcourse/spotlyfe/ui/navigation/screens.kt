@@ -1,6 +1,6 @@
 package com.pdmcourse.spotlyfe.ui.navigation
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-object SavedPlacesScreenNavigation
+sealed class Screen(val route: String) {
+    object SavedPlacesScreenNavigation : Screen("saved_places_screen")
+    object AddPlaceScreenNavigation : Screen("add_place_screen")
+}
